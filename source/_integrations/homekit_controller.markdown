@@ -37,7 +37,7 @@ There is currently support for the following device types within Home Assistant:
 - Light (HomeKit lights)
 - Lock (HomeKit lock)
 - Switch (HomeKit switches, outlets and valves)
-- Binary Sensor (HomeKit motion, contact, occupancy and smoke sensors)
+- Binary Sensor (HomeKit motion, contact, occupancy, carbon monoxide and smoke sensors)
 - Sensor (HomeKit humidity, temperature, co2 and light level sensors)
 - Fan
 - Air Quality
@@ -54,14 +54,6 @@ Home Assistant does not currently support HomeKit BLE.
 <div class='note'>
 
   HomeKit Controller might detect some HomeKit devices on your network that are not currently supported by this integration. One such example is HomeKit displays (such as Vizio TVs which have been updated with HomeKit support). These devices might pair with Home Assistant if you go through the pairing process, but no entity will be created, and you won't be able to control these devices with Home Assistant. However, pairing the device with Home Assistant *will* remove the persistent notification generated when Home Assistant finds new devices.
-
-</div>
-
-<div class="note warning">
-
-If you are using the official Home Assistant images or running Home Assistant Core on Docker, HomeKit controller is ready to go out of the box. If you are running Home Assistant in a manual virtual environment or on a NAS without Docker, you may need to install or upgrade dependencies for HomeKit controller to function.
-
-HomeKit controller requires openssl 1.1.0 or later as the HomeKit Accessory Protocol (HAP) uses the `ChaCha20` stream cipher and the `Poly1305` authenticator.
 
 </div>
 

@@ -35,7 +35,7 @@ script:
   msg_who_is_home:
     sequence:
       - service: notify.notify
-        data_template:
+        data:
           message: >
             {% if is_state('device_tracker.paulus', 'home') %}
               Ha, Paulus is home!
@@ -108,7 +108,12 @@ Other state examples:
 
 {{ as_timestamp(states.binary_sensor.garage_door.last_changed) }}
 
+{{ as_local(states.binary_sensor.garage_door.last_changed) }}
+
 {{ as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_door.last_changed) }}
+
+{{ as_local(states.sensor.time.last_changed) }}
+
 ```
 {% endraw %}
 
@@ -174,8 +179,10 @@ The same thing can also be expressed as a filter:
 - `utcnow()` returns a datetime object of the current time in the UTC timezone.
   - For specific values: `utcnow().second`, `utcnow().minute`, `utcnow().hour`, `utcnow().day`, `utcnow().month`, `utcnow().year`, `utcnow().weekday()` and `utcnow().isoweekday()`.
 - `as_timestamp()` converts datetime object or string to UNIX timestamp. This function also be used as a filter.
+- `as_local()` converts datetime object to local time. This function also be used as a filter.
 - `strptime(string, format)` parses a string based on a [format](https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-behavior) and returns a datetime object.
 - `relative_time` converts datetime object to its human-friendly "age" string. The age can be in second, minute, hour, day, month or year (but only the biggest unit is considered, e.g.,  if it's 2 days and 3 hours, "2 days" will be returned). Note that it only works for dates _in the past_.
+- `timedelta` returns a timedelta object and accepts the same arguments as the Python `datetime.timedelta` function -- days, seconds, microseconds, milliseconds, minutes, hours, weeks.
 - Filter `timestamp_local` converts an UNIX timestamp to its string representation as date/time in your local timezone.
 - Filter `timestamp_utc` converts a UNIX timestamp to its string representation representation as date/time in UTC timezone.
 - Filter `timestamp_custom(format_string, local_time=True)` converts an UNIX timestamp to its string representation based on a custom format, the use of a local timezone is default. Supports the standard [Python time formatting options](https://docs.python.org/3/library/time.html#time.strftime).  
@@ -343,6 +350,10 @@ Some of these functions can also be used in a [filter](https://jinja.palletsproj
 - Filter `value_one|bitwise_or(value_two)` perform a bitwise or(\|) operation with two values.
 - Filter `ord` will return for a string of length one an integer representing the Unicode code point of the character when the argument is a Unicode object, or the value of the byte when the argument is an 8-bit string.
 
+### String filters
+
+- Filter `urlencode` will convert an object to a percent-encoded ASCII text string (e.g., for HTTP requests using `application/x-www-form-urlencoded`).
+
 ### Regular expressions
 
 - Filter `string|regex_match(find, ignorecase=False)` will match the find expression at the beginning of the string using regex.
@@ -397,7 +408,7 @@ Just use the "Square bracket notation" to get the value.
 
 {% raw %}
 ```yaml
-'{{ value_json['values']['temp'] }}'
+"{{ value_json['values']['temp'] }}"
 ```
 {% endraw %}
 

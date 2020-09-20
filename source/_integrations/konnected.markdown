@@ -61,6 +61,7 @@ Once configuration is completed you'll see a Konnected.io entry in **Configurati
 The settings for each panel can be accessed by selecting the entry in **Configuration** -> **Integrations** => **Configured** and then clicking on the gear icon in the upper right corner. You can reconfigure these settings at any time and once completed the settings will be immediately applied.
 
 The settings UI starts by having you configure the general behavior of each zone. You need to specify `Disabled`, `Binary Sensor`, `Digital Sensor`, or `Switchable Output` for each zone.  After that, you'll be prompted, for each zone that is not disabled, to configure details of the zones' behavior. All zones will allow entry of a Name. Additional fields depend on how you configured the general behavior of the zone.  
+**Note some zones do not support all behaviors. The UI will reflect specific options available to each zone.**
 
 ##### Binary Sensor:
 
@@ -142,7 +143,7 @@ devices:
   type: list
   keys:
     id:
-      description: The MAC address of the Konnected device with colons/punctuation removed, for example, `68c63a8bcd53`. You can usually find the mac address in your router's client list. Or, check the `home-assistant.log` for log messages from automatically discovered devices.
+      description: The MAC address (Konnected Alarm Panel) or Device ID (Konnected Alarm Panel Pro) of the Konnected device. MAC addresses must be formatted with colons/punctuation removed, for example, `68c63a8bcd53`. You can usually find the mac address in your router's client list. Or, check the `home-assistant.log` for log messages from automatically discovered devices. Device ID can be found on the device Status Page which is accessible via the Konnected Mobile App.
       required: true
       type: string
     binary_sensors:
@@ -332,6 +333,9 @@ Konnected runs on an ESP8266 board with the NodeMCU firmware. It is commonly use
 | ALARM or OUT               | D8          | 8        | GPIO15       |
 
 ## Revision History
+
+### 0.112
+- Note that Device ID is used for Konnected Alarm Panel Pro and note that it is available on the status page.
 
 ### 0.108
 

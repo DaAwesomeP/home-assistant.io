@@ -35,17 +35,12 @@ friendly_name:
   description: Name of the entity as displayed in the UI.
   required: false
   type: string
-hidden:
-  description: Set to `true` to hide the entity.
-  required: false
-  type: boolean
-  default: false
 entity_picture:
   description: URL to use as picture for entity.
   required: false
   type: string
 icon:
-  description: "Any icon from [MaterialDesignIcons.com](http://MaterialDesignIcons.com) ([Cheatsheet](https://cdn.materialdesignicons.com/4.5.95/)). Prefix name with `mdi:`, ie `mdi:home`. Note: Newer icons may not yet be available in the current Home Assistant release. You can check when an icon was added to MaterialDesignIcons.com at [MDI History](https://materialdesignicons.com/history)."
+  description: "Any icon from [MaterialDesignIcons.com](http://MaterialDesignIcons.com) ([Cheatsheet](https://cdn.materialdesignicons.com/5.3.45/)). Prefix name with `mdi:`, ie `mdi:home`. Note: Newer icons may not yet be available in the current Home Assistant release. You can check when an icon was added to MaterialDesignIcons.com at [MDI History](https://materialdesignicons.com/history)."
   required: false
   type: string
 assumed_state:
@@ -66,7 +61,8 @@ unit_of_measurement:
 initial_state:
   description: Sets the initial state for automations, `on` or `off`.
   required: false
-  type: string
+  type: boolean
+  default: None
 {% endconfiguration %}
 
 #### Device Class
@@ -94,8 +90,6 @@ homeassistant:
 
   customize:
     # Add an entry for each entity that you want to overwrite.
-    sensor.living_room_motion:
-      hidden: true
     thermostat.family_room:
       entity_picture: https://example.com/images/nest.jpg
       friendly_name: Nest
@@ -107,6 +101,9 @@ homeassistant:
       icon: mdi:kettle
     switch.rfxtrx_switch:
       assumed_state: false
+    media_player.my_media_player:
+      source_list:
+        - Channel/input from my available sources
   # Customize all entities in a domain
   customize_domain:
     light:
@@ -118,7 +115,7 @@ homeassistant:
     "light.kitchen_*":
       icon: mdi:description
     "scene.month_*_colors":
-      hidden: true
+      icon: mdi:other
 ```
 
 ### Reloading customize

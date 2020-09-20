@@ -15,20 +15,17 @@ ha_domain: plex
 
 The `plex` integration allows you to connect to a [Plex Media Server](https://plex.tv). Once connected, [Plex Clients](https://www.plex.tv/apps-devices/) playing media from the connected Plex Media Server will show up as [Media Players](/integrations/media_player/) and report playback status via a [Sensor](/integrations/sensor/) in Home Assistant. The Media Players will allow you to control media playback and see the current playing item.
 
+Support for playing music directly on linked [Sonos](/integrations/sonos/) speakers is also available for users with an active [Plex Pass](https://www.plex.tv/plex-pass/) subscription. More information [here](#sonos-playback).
+
 There is currently support for the following device types within Home Assistant:
 
-- [Media Player](#media-player)
 - [Sensor](#sensor)
+- [Media Player](#media-player)
 
 If your Plex server has been claimed by a Plex account via the [claim interface](https://plex.tv/claim), Home Assistant will require authentication to connect.
 
 The Plex integration is set up via **Configuration** -> **Integrations**. You will be redirected to the [Plex](https://plex.tv) website to sign in with your Plex account. Once access is granted, Home Assistant will connect to the server linked to the associated account. If multiple Plex servers are available on the account, you will be prompted to complete the configuration by selecting the desired server on the Integrations page. Home Assistant will show as an authorized device on the [Plex Web](https://app.plex.tv/web/app) interface under **Settings** -> **Authorized Devices**.
 
-<div class='note info'>
-
-Local and secure connections are preferred when setting up an Integration. After the initial configuration, all connections to your Plex servers are made directly without connecting to Plex's services.
-
-</div>
 
 ### Integration Options
 
@@ -56,6 +53,11 @@ Alternatively, you can manually configure a Plex server connection by selecting 
 **Verify SSL certificate**: Verify the SSL certificate of your Plex server. May be used if connecting with an IP or if using a self-signed certificate.
 
 **Token**: A valid authorization token for your Plex server. If provided without 'Host', a connection URL will be retreived from Plex.
+
+
+## Sensor
+
+The `plex` sensor platform will monitor activity on a given Plex Media Server. It will create a sensor that shows the number of currently watching users as the state. If you click the sensor for more details, it will show you who is watching what.
 
 
 ## Media Player
@@ -125,20 +127,49 @@ media_content_type: EPISODE
 media_content_id: '{ "library_name": "Kid TV", "show_name": "Sesame Street", "shuffle": "1" }'
 ```
 
-#### Video
+#### Movie
 
 | Service data attribute | Description                                                                                             |
 | ---------------------- | ------------------------------------------------------------------------------------------------------- |
 | `entity_id`            | `entity_id` of the client                                                                               |
-| `media_content_id`     | Quoted JSON containing:<br/><ul><li>`library_name` (Required)</li><li>`video_name` (Required)</li></ul> |
-| `media_content_type`   | `VIDEO`                                                                                                 |
+| `media_content_id`     | Quoted JSON containing:<br/><ul><li>`library_name` (Required)</li><li>`title` (Required)</li><li>`<SEARCH_KEY>` (optional)</li></ul> |
+| `media_content_type`   | `movie`                                                                                                 |
 
-##### Example:
+For movies it's usually sufficient to provide the title. However, if the title you provide has multiple matches (such as with remakes), more search keys may be necessary. These optional keys can be included in the `media_content_id` JSON payload to restrict the search:
+
+* `unwatched`: Restrict search to unwatched items only (`True`, `False`)
+* `actor`: Restrict search for movies that include a specific actor
+* `collection`: Restrict search within a named Plex collection ("Back to the Future", "Indiana Jones")
+* `contentRating`: Restrict search to a specific content rating ("PG", "R")
+* `country`: Restrict search to a specific country of origin
+* `decade`: Restrict search to a specific decade ("1960", "2010")
+* `director`: Restrict search to a specific director
+* `genre`: Restrict search to a specific genre ("Animation", "Drama", "Sci-Fi")
+* `resolution`: Restrict search to a specific video resolution (480, 720, 1080, "4k")
+* `year`: Restrict search to a specific year
+
+##### Examples:
 ```yaml
 entity_id: media_player.plex_player
-media_content_type: VIDEO
-media_content_id: '{ "library_name": "Adult Movies", "video_name": "Blade" }'
+media_content_type: movie
+media_content_id: '{ "library_name": "Adult Movies", "title": "Blade" }'
 ```
+
+```yaml
+entity_id: media_player.plex_player
+media_content_type: movie
+media_content_id: '{ "library_name": "Adult Movies", "title": "The Manchurian Candidate", year=1962 }'
+# Would find the original instead of the 2004 remake
+```
+
+"Lazy" searches are also possible:
+```yaml
+entity_id: media_player.plex_player
+media_content_type: movie
+media_content_id: '{ "library_name": "Adult Movies", "title": "die hard", year=1995 }'
+# Would find the sequel, "Die Hard: With a Vengeance"
+```
+
 
 ### Compatibility
 
@@ -152,11 +183,76 @@ media_content_id: '{ "library_name": "Adult Movies", "video_name": "Blade" }'
 | NVidia Shield                    | Controlling playback when the Shield is both a client and a server will work but with error logging                                                             |
 | Plex Web                         | None                                                                                                                                                            |
 
-### Notes
+
+## Sonos Playback
+
+To play Plex music directly to Sonos speakers, the following requirements must be met:
+
+1. Have an active [Plex Pass](https://www.plex.tv/plex-pass/) subscription.
+2. Remote access enabled for your Plex server.
+3. Sonos speakers linked to your Plex account [(Instructions)](https://support.plex.tv/articles/control-sonos-playback-with-a-plex-app/).
+4. [Sonos](/integrations/sonos/) integration configured.
+
+### Service `plex.play_on_sonos`
+
+| Service data attribute | Description                                                                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `entity_id`            | `entity_id` of a Sonos integration device
+| `media_content_id`     | Quoted JSON containing:<br/><ul><li>`library_name` (Required)</li><li>`artist_name` (Required)</li><li>`album_name`</li><li>`track_name`</li><li>`track_number`</li><li>`shuffle` (0 or 1)</li></ul> |
+| `media_content_type`   | `MUSIC`                                                                                                                                                                                              |
+
+##### Examples:
+
+```yaml
+entity_id: media_player.sonos_speaker
+media_content_type: MUSIC
+media_content_id: '{ "library_name": "Music", "artist_name": "Adele", "album_name": "25", "track_name": "Hello" }'
+```
+```yaml
+entity_id: media_player.sonos_speaker
+media_content_type: MUSIC
+media_content_id: '{ "library_name": "Music", "artist_name": "Stevie Wonder", "shuffle": "1" }'
+```
+
+## Additional Services
+
+### Service `plex.refresh_library`
+
+Refresh a Plex library to scan for new and updated media.
+
+| Service data attribute | Required | Description | Example |
+| --- | --- | --- | --- |
+| `server_name` | No | Name of Plex server to use if multiple servers configured. | "My Plex Server" |
+| `library_name` | Yes | Name of Plex library to update. | "TV Shows" |
+
+### Service 'plex.scan_for_clients'
+
+Scan for new controllable Plex clients. This may be necessary in scripts or automations which control a Plex `media_player` entity, but where the underlying device must be turned on first.
+
+Example script:
+{% raw %}
+```yaml
+play_plex_on_tv:
+  sequence:
+    - service: media_player.select_source
+      entity_id: media_player.smart_tv
+      data:
+        source: 'Plex'
+    - wait_template: "{{ is_state('media_player.smart_tv', 'On') }}"
+      timeout: '00:00:10'
+    - service: plex.scan_for_clients
+    - wait_template: "{{ not is_state('media_player.plex_smart_tv', 'unavailable') }}"
+      timeout: '00:00:10'
+      continue_on_timeout: false
+    - service: media_player.play_media
+      data:
+        entity_id: media_player.plex_smart_tv
+        media_content_id: '{"library_name": "Movies", "title": "Zoolander"}'
+        media_content_type: movie
+```
+{% endraw %}
+
+## Notes
 
 * The `plex` integration supports multiple Plex servers. Additional connections can be configured under **Configuration** > **Integrations**.
 * Movies must be located under 'Movies' section in the Plex library to properly get 'playing' state.
-
-## Sensor
-
-The `plex` sensor platform will monitor activity on a given [Plex Media Server](https://plex.tv/). It will create a sensor that shows the number of currently watching users as the state. If you click the sensor for more details, it will show you who is watching what.
